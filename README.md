@@ -1,2 +1,2 @@
 # JSONAPICodable
-Swift support for the Json:api standard.
+JSON:API Standard for Swift and Codable types. Use like JSONDecoder / JSONEncoder

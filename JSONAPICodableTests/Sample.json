@@ -1,0 +1,97 @@
+{
+    "data": {
+        "type": "firstType",
+        "id": "d3e0b0e3-b264-4db7-ae46-fa1d50632730",
+        "attributes": {
+            "value": "value_value",
+            "values": ["value", "value"]
+        },
+        "relationships": {
+            "nesteds": {
+                "data": [
+                    {
+                        "type": "nestedType",
+                        "id": "ce9c4bca-aefb-4d44-940a-02af5c9c18f1"
+                    }
+                ]
+            }
+        }
+    },
+    "included": [
+        {
+            "type": "nestedType",
+            "id": "7f2c1ad8-a86b-45ba-a439-1b534ee9d521",
+            "attributes": {
+                "date": "2018-07-02T14:53:14Z",
+                "name": "CHE041"
+            }
+        },
+        {
+            "type": "nestedType",
+            "id": "7f2ddad8-a86b-45ba-a439-1b534ee9d521",
+            "attributes": {
+                "date": "2018-07-02T14:53:14Z",
+                "name": "CHE041"
+            }
+        },
+        {
+            "type": "nestedType",
+            "id": "e67e381d-a99e-469a-b449-2ad1747dcf08",
+            "attributes": {
+                "date": "2018-06-25T13:19:18Z",
+                "name": "CHE041"
+            }
+        },
+        {
+            "type": "nestedType",
+            "id": "e4006838-d9b4-44f3-9569-452314e0803b",
+            "attributes": {
+                "date": "2018-06-25T13:24:45Z",
+                "name": "CHE041"
+            }
+        },
+        {
+            "type": "nestedType",
+            "id": "ce9c4bca-aefb-4d44-940a-02af5c9c18f1",
+            "attributes": {
+                "code": "CHE041",
+                "name": "ZURICH - ZURICH"
+            },
+            "relationships": {
+                "nesteds": {
+                    "data": [
+                        {
+                            "type": "secondType",
+                            "id": "53ea115e-9f55-4559-ba00-f578435bb284"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "secondType",
+            "id": "53ea115e-9f55-4559-ba00-f578435bb284",
+            "attributes": {
+                "name": "Shipping"
+            },
+            "relationships": {
+                "nested": {
+                    "data": [
+                        {
+                            "type": "nestedType",
+                            "id": "7f2c1ad8-a86b-45ba-a439-1b534ee9d521"
+                        },
+                        {
+                            "type": "nestedType",
+                            "id": "e4006838-d9b4-44f3-9569-452314e0803b"
+                        },
+                        {
+                            "type": "nestedType",
+                            "id": "e67e381d-a99e-469a-b449-2ad1747dcf08"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

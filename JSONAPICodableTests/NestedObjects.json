@@ -1,0 +1,41 @@
+{
+    "data": {
+        "type": "objects",
+        "id": "id0",
+        "attributes": {
+            "name": "the name"
+        },
+        "relationships": {
+            "second": {
+                "data": {
+                    "type": "secondobjects",
+                    "id": "id1"
+                }
+            }
+        }
+    },
+    "included": [
+        {
+            "type": "secondobjects",
+            "id": "id1",
+            "attributes": {
+                "name": "second object name"
+            },
+            "relationships": {
+                "third": {
+                    "data": {
+                        "type": "thirdobjects",
+                        "id": "id2"
+                    }
+                }
+            }
+        },
+        {
+            "type": "thirdobjects",
+            "id": "id2",
+            "attributes": {
+                "name": "third name"
+            }
+        }
+    ]
+}
