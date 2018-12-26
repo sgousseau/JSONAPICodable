@@ -13,7 +13,6 @@
 		FB2EAB5A21BC7618006A7F1D /* JSONAPICodable.h in Headers */ = {isa = PBXBuildFile; fileRef = FB2EAB4C21BC7618006A7F1D /* JSONAPICodable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FB7712B221BFCD2400765F87 /* NestedObjects.json in Resources */ = {isa = PBXBuildFile; fileRef = FB7712B121BFCD2400765F87 /* NestedObjects.json */; };
 		FB7712B621BFD87100765F87 /* NestedArrays.json in Resources */ = {isa = PBXBuildFile; fileRef = FB7712B521BFD87100765F87 /* NestedArrays.json */; };
-		FB7712BA21BFE55100765F87 /* JSONAPICoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7712B921BFE55100765F87 /* JSONAPICoder.swift */; };
 		FB7712BC21BFE5AE00765F87 /* JSONAPIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7712BB21BFE5AE00765F87 /* JSONAPIError.swift */; };
 		FB7712BE21BFE7D500765F87 /* JSONAPIEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7712BD21BFE7D500765F87 /* JSONAPIEncoder.swift */; };
 		FB7712C021BFE7F800765F87 /* JSONAPIDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7712BF21BFE7F800765F87 /* JSONAPIDecoder.swift */; };
@@ -43,7 +42,6 @@
 		FB2EAB5921BC7618006A7F1D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FB7712B121BFCD2400765F87 /* NestedObjects.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = NestedObjects.json; sourceTree = "<group>"; };
 		FB7712B521BFD87100765F87 /* NestedArrays.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = NestedArrays.json; sourceTree = "<group>"; };
-		FB7712B921BFE55100765F87 /* JSONAPICoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONAPICoder.swift; sourceTree = "<group>"; };
 		FB7712BB21BFE5AE00765F87 /* JSONAPIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONAPIError.swift; sourceTree = "<group>"; };
 		FB7712BD21BFE7D500765F87 /* JSONAPIEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONAPIEncoder.swift; sourceTree = "<group>"; };
 		FB7712BF21BFE7F800765F87 /* JSONAPIDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONAPIDecoder.swift; sourceTree = "<group>"; };
@@ -96,7 +94,6 @@
 				FB2EAB4D21BC7618006A7F1D /* Info.plist */,
 				FBCDA08E21BC77D400493873 /* JSONAPIProtocols.swift */,
 				FB7712BB21BFE5AE00765F87 /* JSONAPIError.swift */,
-				FB7712B921BFE55100765F87 /* JSONAPICoder.swift */,
 				FB7712BD21BFE7D500765F87 /* JSONAPIEncoder.swift */,
 				FB7712BF21BFE7F800765F87 /* JSONAPIDecoder.swift */,
 			);
@@ -236,7 +233,6 @@
 				FB7712BE21BFE7D500765F87 /* JSONAPIEncoder.swift in Sources */,
 				FB7712C021BFE7F800765F87 /* JSONAPIDecoder.swift in Sources */,
 				FBCDA08F21BC77D400493873 /* JSONAPIProtocols.swift in Sources */,
-				FB7712BA21BFE55100765F87 /* JSONAPICoder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -421,6 +417,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_TESTABILITY = YES;
 				INFOPLIST_FILE = JSONAPICodable/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;

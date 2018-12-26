@@ -31,7 +31,7 @@ final class JSONAPIEncoder {
             
             let enumeration = self.objectEnumerate(object: object)
             
-            debugPrint("encode object \(object) of type \(identifiers.type) with id \(identifiers.id)")
+            //debugPrint("encode object \(object) of type \(identifiers.type) with id \(identifiers.id)")
             
             self.encodeIncluded(object: object)
             
@@ -60,7 +60,7 @@ final class JSONAPIEncoder {
     }
     
     private func parseIncluded() -> [JSON] {
-        print(_allIncluded.keys)
+        //print(_allIncluded.keys)
         return _allIncluded
             .map({ $0.value as? JSON ?? JSON()})
             .filter({ (json) -> Bool in
@@ -95,14 +95,14 @@ final class JSONAPIEncoder {
         
         let enumeration = objectEnumerate(object: value)
         
-        let description =
-        """
-        encode included for \(object),
-            attributes: \(enumeration.attributes.map({ $0.label! }).joined(separator: ", ")),
-            objects: \(enumeration.objects.map({ "\(type(of: $0.value))" }).joined(separator: ", "))
-        """
-        
-        debugPrint(description)
+//        let description =
+//        """
+//        encode included for \(object),
+//            attributes: \(enumeration.attributes.map({ $0.label! }).joined(separator: ", ")),
+//            objects: \(enumeration.objects.map({ "\(type(of: $0.value))" }).joined(separator: ", "))
+//        """
+//        
+        //debugPrint(description)
         
         enumeration.objects.forEach({ encodeIncluded(object: $0.value) })
     
@@ -115,7 +115,7 @@ final class JSONAPIEncoder {
     }
     
     private func encodeRelations(enumeration: ObjectEnumeration) -> JSON? {
-        debugPrint("encode relations for \(enumeration.object)")
+        //debugPrint("encode relations for \(enumeration.object)")
         
         var relations = JSON()
         
@@ -127,7 +127,7 @@ final class JSONAPIEncoder {
                             relations.merge(json, uniquingKeysWith: { a, b in a })
                         }
                     } else {
-                        debugPrint("\(label) -> optional nil")
+                        //debugPrint("\(label) -> optional nil")
                     }
                 } else if let json = encodeRelation(object: property.value, key: label) {
                     relations.merge(json, uniquingKeysWith: { a, b in a })
@@ -141,7 +141,7 @@ final class JSONAPIEncoder {
     private func encodeRelation(object: Any, key: String) -> JSON? {
         
         if let array = object as? [Any] {
-            debugPrint("encode relation as an Array for key: \(key)")
+            //debugPrint("encode relation as an Array for key: \(key)")
             var values = [JSON]()
             for object in array {
                 let enumeration = objectEnumerate(object: object)
@@ -159,7 +159,7 @@ final class JSONAPIEncoder {
             return values.isEmpty ? nil : [key: ["data": values]]
             
         } else {
-            debugPrint("encode relation for \(object), relationKey: \(key)")
+            //debugPrint("encode relation for \(object), relationKey: \(key)")
             var values = JSON()
             let enumeration = objectEnumerate(object: object)
             
@@ -176,7 +176,7 @@ final class JSONAPIEncoder {
     }
 
     private func encodeAttributes(enumeration: ObjectEnumeration) -> JSON? {
-        debugPrint("encode attributes for \(enumeration.object)")
+        //debugPrint("encode attributes for \(enumeration.object)")
         
         var attributes = JSON()
         
@@ -196,7 +196,7 @@ final class JSONAPIEncoder {
     }
     
     private func buildObject(identifiers: ObjectIdentifier, enumeration: ObjectEnumeration) -> JSON {
-        debugPrint("building \(identifiers.id):\(identifiers.type)")
+        //debugPrint("building \(identifiers.id):\(identifiers.type)")
         
         var json = JSON()
         
@@ -219,7 +219,7 @@ final class JSONAPIEncoder {
     }
     
     private func objectEnumerate(object: Any) -> ObjectEnumeration {
-        debugPrint(object)
+        //debugPrint(object)
         var attributes = [Mirror.Child]()
         var objects = [Mirror.Child]()
         
