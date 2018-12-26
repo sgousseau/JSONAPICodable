@@ -2,6 +2,8 @@ import Foundation
 
 public final class JSONAPIDecoder {
     
+    public init() {}
+    
     public func decode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable {
         
         guard let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? JSON,

@@ -15,6 +15,8 @@ public final class JSONAPIEncoder {
     private var _allIncluded = JSON()
     private var _allIncludedForbidden = [String]()
     
+    public init() {}
+    
     public func encode(object: Any) throws -> Data {
         return try JSONSerialization.data(withJSONObject: encodeJSON(from: object), options: .prettyPrinted)
     }
