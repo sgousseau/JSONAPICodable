@@ -1,8 +1,8 @@
 import Foundation
 
-class JSONAPIDecoder {
+public final class JSONAPIDecoder {
     
-    func decode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable {
+    public func decode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable {
         
         guard let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? JSON,
             let dataObject = jsonObject?["data"]
@@ -27,7 +27,7 @@ class JSONAPIDecoder {
         return codable
     }
     
-    func buildCodableRelations(object: JSON, included: [JSON]) -> JSON? {
+    private func buildCodableRelations(object: JSON, included: [JSON]) -> JSON? {
         var json = JSON()
         
         guard let relations = object["relationships"] as? JSON, !relations.isEmpty else {
@@ -79,7 +79,7 @@ class JSONAPIDecoder {
         return json
     }
     
-    func buildIdentifiers(object: JSON) -> JSON? {
+    private func buildIdentifiers(object: JSON) -> JSON? {
         var json = JSON()
         
         guard let identifier = object["id"] as? String, let type = object["type"] as? String else {
@@ -95,7 +95,7 @@ class JSONAPIDecoder {
         return json
     }
     
-    func buildCodableAttributes(object: JSON) -> JSON? {
+    private func buildCodableAttributes(object: JSON) -> JSON? {
         guard let attributes = object["attributes"] as? JSON else {
             debugPrint("No attributes...")
             return nil
@@ -111,7 +111,7 @@ class JSONAPIDecoder {
         return json
     }
     
-    func buildCodableJSON(object: JSON, included: [JSON]) -> JSON? {
+    private func buildCodableJSON(object: JSON, included: [JSON]) -> JSON? {
         var json = JSON()
         
         guard let identifiers = buildIdentifiers(object: object) else {
@@ -134,7 +134,7 @@ class JSONAPIDecoder {
         return json
     }
     
-    func  getIncludedData(included: [JSON], identifier: String) -> JSON? {
+    private func  getIncludedData(included: [JSON], identifier: String) -> JSON? {
         return included.first(where: {
             ($0["id"] as? String ?? "") == identifier
         })

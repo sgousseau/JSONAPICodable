@@ -1,6 +1,6 @@
 import Foundation
 
-final class JSONAPIEncoder {
+public final class JSONAPIEncoder {
     
 //    enum Options {
 //        case withoutId
@@ -15,7 +15,7 @@ final class JSONAPIEncoder {
     private var _allIncluded = JSON()
     private var _allIncludedForbidden = [String]()
     
-    func encode(object: Any) throws -> Data {
+    public func encode(object: Any) throws -> Data {
         return try JSONSerialization.data(withJSONObject: encodeJSON(from: object), options: .prettyPrinted)
     }
     
@@ -101,7 +101,7 @@ final class JSONAPIEncoder {
 //            attributes: \(enumeration.attributes.map({ $0.label! }).joined(separator: ", ")),
 //            objects: \(enumeration.objects.map({ "\(type(of: $0.value))" }).joined(separator: ", "))
 //        """
-//        
+//
         //debugPrint(description)
         
         enumeration.objects.forEach({ encodeIncluded(object: $0.value) })

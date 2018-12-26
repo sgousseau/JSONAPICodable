@@ -2,7 +2,7 @@ import Foundation
 
 typealias JSON = [String: Any]
 
-protocol JSONAPICodable: Codable {
+public protocol JSONAPICodable: Codable {
     var id: String { get set }
     var type: String { get set }
 }
