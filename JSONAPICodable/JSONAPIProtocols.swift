@@ -1,6 +1,6 @@
 import Foundation
 
-typealias JSON = [String: Any]
+public typealias JSON = [String: Any]
 
 public protocol JSONAPICodable: Codable {
     var id: String { get set }
