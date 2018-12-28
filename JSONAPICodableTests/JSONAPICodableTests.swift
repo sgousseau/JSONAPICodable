@@ -82,29 +82,30 @@ class JSONAPICodableTests: XCTestCase {
 //        }
 //    }
 //
-//    func testArrays() {
-//        let goodyear = Tire(id: "tire0", name: "GoodYear-Sport-Tire", model: "gy-sp00-19p-22p")
-//        let audiwheels = [Wheel(id: "wheel0", tire: goodyear), Wheel(id: "wheel1", tire: goodyear), Wheel(id: "wheel2", tire: goodyear), Wheel(id: "wheel3", tire: goodyear)]
-//        let audi = Car(id: "car0", name: "Audi S3", wheels: audiwheels)
-//
-//        let pirelli = Tire(id: "tire1", name: "Pirelli-Magnet-Tire", model: "pm22p00mg")
-//        let bmwwheels = [Wheel(id: "wheel4", tire: pirelli), Wheel(id: "wheel5", tire: pirelli), Wheel(id: "wheel6", tire: pirelli), Wheel(id: "wheel7", tire: pirelli)]
-//        let bmw = Car(id: "car1", name: "BMW M1", wheels: bmwwheels)
-//
-//        let cars = [audi, bmw]
-//
-//        do {
-//            let encoded = try JSONAPIEncoder().encode(object: cars)
-//            debugPrint("---------------------------------------------")
-//            debugPrint(String(data: encoded, encoding: .utf8)!)
-//            debugPrint("---------------------------------------------")
-//            let inverse = try JSONAPIDecoder().decode([Car].self, from: encoded)
-//            debugPrint("---------------------------------------------")
-//            XCTAssert(cars.count == inverse.count, "Inverse serialization object should produce same object")
-//        } catch {
-//            XCTAssert(false, error.localizedDescription)
-//        }
-//    }
+    
+    func testArrays() {
+        let goodyear = Tire(id: "tire0", name: "GoodYear-Sport-Tire", model: "gy-sp00-19p-22p")
+        let audiwheels = [Wheel(id: "wheel0", tire: goodyear), Wheel(id: "wheel1", tire: goodyear), Wheel(id: "wheel2", tire: goodyear), Wheel(id: "wheel3", tire: goodyear)]
+        let audi = Car(id: "car0", name: "Audi S3", wheels: audiwheels)
+
+        let pirelli = Tire(id: "tire1", name: "Pirelli-Magnet-Tire", model: "pm22p00mg")
+        let bmwwheels = [Wheel(id: "wheel4", tire: pirelli), Wheel(id: "wheel5", tire: pirelli), Wheel(id: "wheel6", tire: pirelli), Wheel(id: "wheel7", tire: pirelli)]
+        let bmw = Car(id: "car1", name: "BMW M1", wheels: bmwwheels)
+
+        let cars = [audi, bmw]
+
+        do {
+            let encoded = try JSONAPIEncoder().encode(object: cars)
+            debugPrint("---------------------------------------------")
+            debugPrint(String(data: encoded, encoding: .utf8)!)
+            debugPrint("---------------------------------------------")
+            let inverse = try JSONAPIDecoder().decode([Car].self, from: encoded)
+            debugPrint("---------------------------------------------")
+            XCTAssert(cars.count == inverse.count, "Inverse serialization object should produce same object")
+        } catch {
+            XCTAssert(false, error.localizedDescription)
+        }
+    }
     
 }
 
