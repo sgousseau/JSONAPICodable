@@ -1,8 +1,8 @@
 import Foundation
 
-typealias JSON = [String: Any]
+public typealias JSON = [String: Any]
 
-protocol JSONAPICodable: Codable {
+public protocol JSONAPICodable: Codable {
     var id: String { get set }
     var type: String { get set }
 }
@@ -25,24 +25,5 @@ extension Optional : OptionalProtocol {
         case .none: preconditionFailure("nil unwrap")
         case .some(let unwrapped): return unwrapped
         }
-    }
-}
-
-extension Sequence where Iterator.Element: Hashable {
-    func unique() -> [Iterator.Element] {
-        var seen: [Iterator.Element: Bool] = [:]
-        return self.filter { seen.updateValue(true, forKey: $0) == nil }
-    }
-}
-
-extension Array where Element : Equatable {
-    var unique: [Element] {
-        var uniqueValues: [Element] = []
-        forEach { item in
-            if !uniqueValues.contains(item) {
-                uniqueValues += [item]
-            }
-        }
-        return uniqueValues
     }
 }

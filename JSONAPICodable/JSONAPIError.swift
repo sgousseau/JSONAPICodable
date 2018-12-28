@@ -1,6 +1,6 @@
 import Foundation
 
-enum JSONAPIError: Error {
+public enum JSONAPIError: Error {
     case encodeNil
     case notCodable(type: AnyClass)
     case notJson(data: Data)
