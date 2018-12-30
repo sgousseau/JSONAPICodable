@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'JSONAPICodable'
-  s.version          = '1.0.7'
+  s.version          = '1.0.8'
   s.summary          = 'Json:api support for Swift Codable objects.'
  
   s.description      = <<-DESC

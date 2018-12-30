@@ -38,7 +38,7 @@ public final class JSONAPIEncoder {
             
             let enumeration = try self.objectEnumerate(object: object)
             
-            //debugPrint("encode object \(object) of type \(identifiers.type) with id \(identifiers.id)")
+            //debug//print("encode object \(object) of type \(identifiers.type) with id \(identifiers.id)")
             
             try self.encodeIncluded(object: object)
             
@@ -83,7 +83,7 @@ public final class JSONAPIEncoder {
             let mirror = Mirror(reflecting: unwrap(object))
             guard let id = mirror.children.first(where: { $0.label == "id" })?.value as? String,
                 let type = mirror.children.first(where: { $0.label == "type" })?.value as? String else {
-                    print(object, "no identifiers")
+                    ////print(object, "no identifiers")
                     return nil
             }
             
@@ -93,7 +93,7 @@ public final class JSONAPIEncoder {
     
     private func encodeIncluded(object: Any) throws {
         
-        print("encode included for type: \(type(of: object))")
+        ////print("encode included for type: \(type(of: object))")
         
         var value: Any
         if let optional = object as? OptionalProtocol, optional.isSome() {
@@ -111,7 +111,7 @@ public final class JSONAPIEncoder {
 //            objects: \(enumeration.objects.map({ "\(type(of: $0.value))" }).joined(separator: ", "))
 //        """
 //
-        //debugPrint(description)
+        //debug//print(description)
         
         try enumeration.objects.forEach({ try encodeIncluded(object: $0.value) })
     
@@ -124,7 +124,7 @@ public final class JSONAPIEncoder {
     }
     
     private func encodeRelations(enumeration: ObjectEnumeration) throws -> JSON? {
-        //debugPrint("encode relations for \(enumeration.object)")
+        //debug//print("encode relations for \(enumeration.object)")
         
         var relations = JSON()
         
@@ -136,7 +136,7 @@ public final class JSONAPIEncoder {
                             relations.merge(json, uniquingKeysWith: { a, b in a })
                         }
                     } else {
-                        //debugPrint("\(label) -> optional nil")
+                        //debug//print("\(label) -> optional nil")
                     }
                 } else if let json = try encodeRelation(object: property.value, key: label) {
                     relations.merge(json, uniquingKeysWith: { a, b in a })
@@ -150,7 +150,7 @@ public final class JSONAPIEncoder {
     private func encodeRelation(object: Any, key: String) throws -> JSON? {
         
         if let array = object as? [Any] {
-            //debugPrint("encode relation as an Array for key: \(key)")
+            //debug//print("encode relation as an Array for key: \(key)")
             var values = [JSON]()
             for object in array {
                 let enumeration = try objectEnumerate(object: object)
@@ -169,7 +169,7 @@ public final class JSONAPIEncoder {
             return values.isEmpty ? nil : [key: ["data": values]]
             
         } else {
-            //debugPrint("encode relation for \(object), relationKey: \(key)")
+            //debug//print("encode relation for \(object), relationKey: \(key)")
             var values = JSON()
             let enumeration = try objectEnumerate(object: object)
             
@@ -187,7 +187,7 @@ public final class JSONAPIEncoder {
     }
 
     private func encodeAttributes(enumeration: ObjectEnumeration) -> JSON? {
-        //debugPrint("encode attributes for \(enumeration.object)")
+        //debug//print("encode attributes for \(enumeration.object)")
         
         var attributes = JSON()
         
@@ -204,7 +204,7 @@ public final class JSONAPIEncoder {
     }
     
     private func buildObject(identifiers: ObjectIdentifier, enumeration: ObjectEnumeration) throws -> JSON {
-        //debugPrint("building \(identifiers.id):\(identifiers.type)")
+        //debug//print("building \(identifiers.id):\(identifiers.type)")
         
         var json = JSON()
         
@@ -228,25 +228,25 @@ public final class JSONAPIEncoder {
     
     private func objectEnumerate(object: Any) throws -> ObjectEnumeration {
         
-        print("objectEnumerate", type(of: object))
+        //print("objectEnumerate", type(of: object))
         
         var attributes = [Mirror.Child]()
         var objects = [Mirror.Child]()
         
         for property in Mirror(reflecting: object).children {
-            print("\t", property.label ?? "item of array,", type(of: property.value))
+            //print("\t", property.label ?? "item of array,", type(of: property.value))
             
             if isAnAttribute(property) {
                 attributes.append(property)
             } else if isCodableAsRelation(property) {
                 objects.append(property)
             } else {
-                print("something wrong with this property")
+                //print("something wrong with this property")
                 throw JSONAPIError.notJsonApiCompatible(object: property.value)
             }
         }
         
-        print("\t\t->", "attributes:\(attributes.count), objects:\(objects.count)")
+        //print("\t\t->", "attributes:\(attributes.count), objects:\(objects.count)")
         
         return (object: object, attributes: attributes, objects: objects)
     }
@@ -376,7 +376,7 @@ public final class JSONAPIEncoder {
     }
     
     private func unwrap(_ object: Any) -> Any {
-        if let optional = object as? OptionalProtocol {
+        if let optional = object as? OptionalProtocol, optional.isSome() {
             return optional.unwrap()
         }
         return object

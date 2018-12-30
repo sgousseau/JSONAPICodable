@@ -25,6 +25,7 @@ public final class JSONAPIDecoder {
         }
         
         let jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+        //print(String(data: jsonData, encoding: .utf8)!)
         let codable = try JSONDecoder().decode(T.self, from: jsonData)
         return codable
     }
@@ -41,8 +42,8 @@ public final class JSONAPIDecoder {
             if let identifiers = self.buildIdentifiers(object: object) {
                 json.merge(identifiers, uniquingKeysWith: { a, b in a })
                 
-                if let identifier = identifiers["id"] as? String {
-                    if let includedData = self.getIncludedData(included: included, identifier: identifier) {
+                if let identifier = identifiers["id"] as? String, let type = identifiers["type"] as? String {
+                    if let includedData = self.getIncludedData(included: included, identifier: identifier, type: type) {
                         return self.buildCodableJSON(object: includedData, included: included)
                     }
                 }
@@ -85,21 +86,21 @@ public final class JSONAPIDecoder {
         var json = JSON()
         
         guard let identifier = object["id"] as? String, let type = object["type"] as? String else {
-            debugPrint("No identifiers...")
+            //debugPrint("No identifiers...")
             return nil
         }
         
         json["id"] = identifier
         json["type"] = type
         
-        debugPrint("buildIdentifiers", identifier, type)
+        //debugPrint("buildIdentifiers", identifier, type)
         
         return json
     }
     
     private func buildCodableAttributes(object: JSON) -> JSON? {
         guard let attributes = object["attributes"] as? JSON else {
-            debugPrint("No attributes...")
+            //debugPrint("No attributes...")
             return nil
         }
         
@@ -108,7 +109,7 @@ public final class JSONAPIDecoder {
             json[attribute] = attributes[attribute]
         }
         
-        debugPrint("buildCodableAttributes", "\(attributes)")
+        //debugPrint("buildCodableAttributes", "\(attributes)")
         
         return json
     }
@@ -117,11 +118,11 @@ public final class JSONAPIDecoder {
         var json = JSON()
         
         guard let identifiers = buildIdentifiers(object: object) else {
-            debugPrint("No identifiers")
+            //debugPrint("No identifiers")
             return nil
         }
         
-        debugPrint("buildCodableJSON", "\(identifiers)")
+        //debugPrint("buildCodableJSON", "\(identifiers)")
         
         json.merge(identifiers, uniquingKeysWith: { a, b in a })
         
@@ -136,9 +137,9 @@ public final class JSONAPIDecoder {
         return json
     }
     
-    private func  getIncludedData(included: [JSON], identifier: String) -> JSON? {
+    private func  getIncludedData(included: [JSON], identifier: String, type: String) -> JSON? {
         return included.first(where: {
-            ($0["id"] as? String ?? "") == identifier
+            ($0["id"] as? String ?? "") == identifier && ($0["type"] as? String ?? "") == type
         })
     }
     
