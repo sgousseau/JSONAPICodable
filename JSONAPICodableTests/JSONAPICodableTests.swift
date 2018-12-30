@@ -78,16 +78,30 @@ class JSONAPICodableTests: XCTestCase {
 //        }
 //    }
     
-    func testWallets() {
-        
-        let wallet = Wallet(id: "w0", bitcoinWallets: [BitCoinWallet(id: "bw0"), BitCoinWallet(id: "bw0")])
-        
+//    func testWallets() {
+//
+//        let wallet = Wallet(id: "w0", bitcoinWallets: [BitCoinWallet(id: "bw0"), BitCoinWallet(id: "bw0")])
+//
+//        do {
+//
+//            let encoded = try JSONAPIEncoder().encode(object: wallet)
+//            printJson(data: encoded)
+//
+//            XCTAssertTrue(try encodingAndDecoding(toEncode: wallet), "Inverse serialization object should produce same object")
+//        } catch {
+//            XCTAssert(false, "Inverse serialization object should produce same object\n\n\(error.localizedDescription)")
+//        }
+//    }
+
+    func testUser() {
+        let user = User(id: "user0", info: "The first user", location: Location(id: "location0", region: Region(id: "region0", name: "Paris")))
+
         do {
-            
-            let encoded = try JSONAPIEncoder().encode(object: wallet)
+
+            let encoded = try JSONAPIEncoder().encode(object: user)
             printJson(data: encoded)
-            
-            XCTAssertTrue(try encodingAndDecoding(toEncode: wallet), "Inverse serialization object should produce same object")
+
+            XCTAssertTrue(try encodingAndDecoding(toEncode: user), "Inverse serialization object should produce same object")
         } catch {
             XCTAssert(false, "Inverse serialization object should produce same object\n\n\(error.localizedDescription)")
         }

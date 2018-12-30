@@ -166,3 +166,38 @@ class BitcoinWalletMeta: Codable, JSONAPIAttributeExpressible {
         link = "meta:link"
     }
 }
+
+class User: Codable {
+    let id: String
+    let type: String = "users"
+    let info: String
+    let location: Location?
+    
+    init(id: String, info: String, location: Location) {
+        self.id = id
+        self.info = info
+        self.location = location
+    }
+}
+
+class Location: Codable {
+    let id: String
+    let type: String = "locations"
+    let region: Region
+    
+    init(id: String, region: Region) {
+        self.id = id
+        self.region = region
+    }
+}
+
+class Region: Codable {
+    let id: String
+    let name: String
+    
+    init(id: String, name: String) {
+        self.id = id
+        self.name = name
+    }
+}
+

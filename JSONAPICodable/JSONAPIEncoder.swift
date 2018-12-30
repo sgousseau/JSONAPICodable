@@ -80,9 +80,10 @@ public final class JSONAPIEncoder {
         if let object = object as? JSON, let id = object["id"] as? String, let type = object["type"] as? String {
             return (id: id, type: type)
         } else {
-            let mirror = Mirror(reflecting: object)
+            let mirror = Mirror(reflecting: unwrap(object))
             guard let id = mirror.children.first(where: { $0.label == "id" })?.value as? String,
                 let type = mirror.children.first(where: { $0.label == "type" })?.value as? String else {
+                    print(object, "no identifiers")
                     return nil
             }
             
@@ -274,6 +275,10 @@ public final class JSONAPIEncoder {
             return true
         } else if let _ = property.value as? [JSONAPIAttributeExpressible] {
             return true
+        } else if let optional = property.value as? OptionalProtocol, let _ = optional as? JSONAPIAttributeExpressible {
+            return true
+        } else if let optional = property.value as? OptionalProtocol, let _ = optional as? [JSONAPIAttributeExpressible] {
+            return true
         }
         return isCodableAsAttribute(property)
     }
@@ -283,10 +288,14 @@ public final class JSONAPIEncoder {
     }
     
     private func isCodableAsAttribute(_ value: Any) -> Bool {
-        if let array = value as? [Any] {
+        var object: Any = value
+        if let optional = value as? OptionalProtocol {
+            object = optional
+        }
+        if let array = object as? [Any] {
             return array.reduce(true) { isCodableAsAttribute($1) && $0 }
         }
-        return encodeIdentifiers(value) == nil
+        return encodeIdentifiers(object) == nil
     }
     
     private func isCodableAsRelation(_ property: Mirror.Child) -> Bool {
@@ -294,10 +303,14 @@ public final class JSONAPIEncoder {
     }
     
     private func isCodableAsRelation(_ value: Any) -> Bool {
-        if let array = value as? [Any] {
+        var object: Any = value
+        if let optional = value as? OptionalProtocol {
+            object = optional
+        }
+        if let array = object as? [Any] {
             return array.reduce(true) { isCodableAsRelation($1) && $0 }
         }
-        return encodeIdentifiers(value) != nil //missing either id or type variable, cant be serialized as a relation
+        return encodeIdentifiers(object) != nil //missing either id or type variable, cant be serialized as a relation
     }
     
     private func isArrayOfPrimitive(property: Mirror.Child) -> Bool {
@@ -360,6 +373,13 @@ public final class JSONAPIEncoder {
             return true
         }
         return false
+    }
+    
+    private func unwrap(_ object: Any) -> Any {
+        if let optional = object as? OptionalProtocol {
+            return optional.unwrap()
+        }
+        return object
     }
 }
 
