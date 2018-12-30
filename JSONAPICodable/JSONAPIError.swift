@@ -12,4 +12,8 @@ public enum JSONAPIError: Error {
     case hasNoRelationshipsKey(json: JSON)
     case hasNoIncludedKey(json: JSON)
     case hasNoFilterKey(json: JSON)
+    
+    public var localizedDescription: String {
+        return "\(self)"
+    }
 }

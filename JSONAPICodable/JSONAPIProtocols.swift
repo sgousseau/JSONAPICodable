@@ -7,6 +7,20 @@ public protocol JSONAPICodable: Codable {
     var type: String { get set }
 }
 
+public protocol JSONAPIAttributeExpressible: Codable {}
+
+extension String: JSONAPIAttributeExpressible {}
+
+public protocol JSONAPIPrimitive {}
+
+extension String: JSONAPIPrimitive {}
+extension Int: JSONAPIPrimitive {}
+extension Double: JSONAPIPrimitive {}
+extension Float: JSONAPIPrimitive {}
+extension Bool: JSONAPIPrimitive {}
+
+extension Optional: JSONAPIPrimitive where Wrapped == JSONAPIPrimitive {}
+
 protocol OptionalProtocol {
     func isSome() -> Bool
     func unwrap() -> Any

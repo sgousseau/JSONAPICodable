@@ -130,3 +130,39 @@ class Tire: JSONAPICodable, Equatable {
         return (lhs.id == rhs.id) && (lhs.type == rhs.type) && (lhs.name == rhs.name) && (lhs.model == rhs.model)
     }
 }
+
+class Wallet: Codable {
+    let id: String
+    let type: String = "wallets"
+    var bitcoins: [BitCoinWallet]
+    
+    init(id: String, bitcoinWallets: [BitCoinWallet]) {
+        self.id = id
+        bitcoins = bitcoinWallets
+    }
+}
+
+class BitCoinWallet: Codable {
+    let id: String
+    let type: String = "bitcoinwallets"
+    let keys: [String]
+    let additional: BitcoinWalletMeta
+    
+    init(id: String) {
+        self.id = id
+        keys = ["kA", "kB", "kC"]
+        additional = BitcoinWalletMeta()
+    }
+}
+
+class BitcoinWalletMeta: Codable, JSONAPIAttributeExpressible {
+    let id: String = "add0"
+    let type: String = "additionals"
+    let info: String
+    let link: String
+    
+    init() {
+        info = "meta:info"
+        link = "meta:link"
+    }
+}
