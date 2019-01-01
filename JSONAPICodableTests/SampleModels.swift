@@ -1,36 +1,24 @@
 import Foundation
 
-class TopObject: JSONAPICodable, Equatable {
+class TopObject: Codable {
     var id: String
     var type: String = "objects"
     var name: String
     var second: SecondObject
-    
-    static func == (lhs: TopObject, rhs: TopObject) -> Bool {
-        return (lhs.id == rhs.id) && (lhs.type == rhs.type) && (lhs.name == rhs.name) && (lhs.second == rhs.second)
-    }
 }
 
-class SecondObject: JSONAPICodable, Equatable {
+class SecondObject: Codable {
     var id: String
     var type: String = "secondobjects"
     var name: String
     var third: ThirdObject?
-    
-    static func == (lhs: SecondObject, rhs: SecondObject) -> Bool {
-        return (lhs.id == rhs.id) && (lhs.type == rhs.type) && (lhs.name == rhs.name) && (lhs.third == rhs.third)
-    }
 }
 
-class ThirdObject: JSONAPICodable, Equatable {
+class ThirdObject: Codable {
     var id: String
     var type: String = "thirdobjects"
     var name: String
     var fourth: FourthObject?
-    
-    static func == (lhs: ThirdObject, rhs: ThirdObject) -> Bool {
-        return (lhs.id == rhs.id) && (lhs.type == rhs.type) && (lhs.name == rhs.name)
-    }
 }
 
 class FourthObject: Codable {
@@ -38,7 +26,7 @@ class FourthObject: Codable {
     var type: String = "fourthobjects"
 }
 
-class ATM: JSONAPICodable, Equatable {
+class ATM: Codable {
     var id: String
     var type: String = "atms"
     var name: String
@@ -49,13 +37,9 @@ class ATM: JSONAPICodable, Equatable {
         self.name = name
         self.cash = cash
     }
-    
-    static func == (lhs: ATM, rhs: ATM) -> Bool {
-        return (lhs.id == rhs.id) && (lhs.type == rhs.type) && (lhs.name == rhs.name) && (lhs.cash.count == rhs.cash.count)
-    }
 }
 
-class Cash: JSONAPICodable {
+class Cash: Codable {
     var id: String
     var type: String = "cashs"
     var value: Int
@@ -84,7 +68,7 @@ class Links: Codable {
     var last: String?
 }
 
-class Car: JSONAPICodable, Equatable {
+class Car: Codable {
     var id: String
     var type: String = "cars"
     var name: String
@@ -95,13 +79,9 @@ class Car: JSONAPICodable, Equatable {
         self.name = name
         self.wheels = wheels
     }
-    
-    static func == (lhs: Car, rhs: Car) -> Bool {
-        return (lhs.id == rhs.id) && (lhs.type == rhs.type) && (lhs.name == rhs.name) && (lhs.wheels.count == rhs.wheels.count)
-    }
 }
 
-class Wheel: JSONAPICodable {
+class Wheel: Codable {
     var id: String
     var type: String = "wheels"
     var name: String
@@ -114,7 +94,7 @@ class Wheel: JSONAPICodable {
     }
 }
 
-class Tire: JSONAPICodable, Equatable {
+class Tire: Codable {
     var id: String
     var type: String = "tires"
     var name: String
@@ -124,10 +104,6 @@ class Tire: JSONAPICodable, Equatable {
         self.id = id
         self.name = name
         self.model = model
-    }
-    
-    static func == (lhs: Tire, rhs: Tire) -> Bool {
-        return (lhs.id == rhs.id) && (lhs.type == rhs.type) && (lhs.name == rhs.name) && (lhs.model == rhs.model)
     }
 }
 
@@ -199,4 +175,104 @@ class Region: Codable {
         self.id = id
         self.name = name
     }
+}
+
+class Article: Codable {
+    var id: String
+    let type = "articles"
+    var title: String
+    var author: People
+    var comments: [Comment]
+    
+    init(id: String, title: String, author: People, comments: [Comment]) {
+        self.id = id
+        self.title = title
+        self.author = author
+        self.comments = comments
+    }
+}
+
+class People: Codable {
+    var id: String
+    let type = "people"
+    var lastname: String
+    var firstname: String
+    var twitter: String
+    var links: SelfLink
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case lastname = "last-name"
+        case firstname = "first-name"
+        case twitter
+        case links
+    }
+    
+    init(id: String, firstname: String, lastname: String, twitter: String, links: SelfLink) {
+        self.id = id
+        self.firstname = firstname
+        self.lastname = lastname
+        self.twitter = twitter
+        self.links = links
+    }
+}
+
+class Comment: Codable {
+    var id: String
+    let type = "comments"
+    var body: String
+    var links: SelfLink
+    
+    init(id: String, body: String, twitter: String, links: SelfLink) {
+        self.id = id
+        self.body = body
+        self.links = links
+    }
+}
+
+class SelfLink: Codable {
+    var this: String
+    
+    init(this: String) {
+        self.this = this
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case this = "self"
+    }
+}
+
+class RelatedLink: Codable {
+    var this: String
+    var related: String
+    
+    init(this: String, related: String) {
+        self.this = this
+        self.related = related
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case this = "self"
+        case related
+    }
+}
+
+class RelatedMetaLink: Codable {
+    var this: String
+    var related: Meta
+    
+    init(this: String, related: Meta) {
+        self.this = this
+        self.related = related
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case this = "self"
+        case related
+    }
+}
+
+class Meta: Codable {
+    
 }

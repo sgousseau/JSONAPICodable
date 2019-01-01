@@ -2,24 +2,12 @@ import Foundation
 
 public typealias JSON = [String: Any]
 
-public protocol JSONAPICodable: Codable {
-    var id: String { get set }
-    var type: String { get set }
-}
+//public protocol JSONAPICodable: Codable {
+//    var id: String { get set }
+//    var type: String { get set }
+//}
 
 public protocol JSONAPIAttributeExpressible: Codable {}
-
-extension String: JSONAPIAttributeExpressible {}
-
-public protocol JSONAPIPrimitive {}
-
-extension String: JSONAPIPrimitive {}
-extension Int: JSONAPIPrimitive {}
-extension Double: JSONAPIPrimitive {}
-extension Float: JSONAPIPrimitive {}
-extension Bool: JSONAPIPrimitive {}
-
-extension Optional: JSONAPIPrimitive where Wrapped == JSONAPIPrimitive {}
 
 protocol OptionalProtocol {
     func isSome() -> Bool

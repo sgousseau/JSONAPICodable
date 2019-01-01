@@ -25,9 +25,23 @@ public final class JSONAPIDecoder {
         }
         
         let jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
-        //print(String(data: jsonData, encoding: .utf8)!)
+        
+//        #if DEBUG
+//        print("JSON:API")
+//        print(String(data: jsonData, encoding: .utf8)!)
+//        #endif
         let codable = try JSONDecoder().decode(T.self, from: jsonData)
         return codable
+    }
+    
+    private func json(data: Data) throws -> JSON? {
+        
+        return nil
+    }
+    
+    private func jsonapi(json: JSON) throws -> JSON? {
+        
+        return nil
     }
     
     private func buildCodableRelations(object: JSON, included: [JSON]) -> JSON? {
@@ -42,10 +56,8 @@ public final class JSONAPIDecoder {
             if let identifiers = self.buildIdentifiers(object: object) {
                 json.merge(identifiers, uniquingKeysWith: { a, b in a })
                 
-                if let identifier = identifiers["id"] as? String, let type = identifiers["type"] as? String {
-                    if let includedData = self.getIncludedData(included: included, identifier: identifier, type: type) {
-                        return self.buildCodableJSON(object: includedData, included: included)
-                    }
+                if let includedData = self.getIncludedData(included: included, identifier: object.identifier!) {
+                    return self.buildCodableJSON(object: includedData, included: included)
                 }
             }
             return json
@@ -118,11 +130,8 @@ public final class JSONAPIDecoder {
         var json = JSON()
         
         guard let identifiers = buildIdentifiers(object: object) else {
-            //debugPrint("No identifiers")
             return nil
         }
-        
-        //debugPrint("buildCodableJSON", "\(identifiers)")
         
         json.merge(identifiers, uniquingKeysWith: { a, b in a })
         
@@ -134,12 +143,20 @@ public final class JSONAPIDecoder {
             json.merge(relations, uniquingKeysWith: { a, b in a })
         }
         
+        if let links = object.links {
+            json["links"] = links
+        }
+        
+        if let meta = object.meta {
+            json["meta"] = meta
+        }
+        
         return json
     }
     
-    private func  getIncludedData(included: [JSON], identifier: String, type: String) -> JSON? {
+    private func  getIncludedData(included: [JSON], identifier: String) -> JSON? {
         return included.first(where: {
-            ($0["id"] as? String ?? "") == identifier && ($0["type"] as? String ?? "") == type
+            $0.identifier! == identifier
         })
     }
     

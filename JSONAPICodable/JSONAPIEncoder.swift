@@ -6,384 +6,158 @@ public final class JSONAPIEncoder {
         case emptyId
         case randomId
     }
-//    enum Options {
-//        case withoutId
-//        case randomId
-//    }
-//
-//    private var options = Options.withoutId
+    
     private var encodingStrategy: IdEncodingStrategy = .randomId
-    
-    private typealias ObjectEnumeration = (object: Any, attributes: [Mirror.Child], objects: [Mirror.Child])
-    private typealias ObjectIdentifier = (id: String, type: String)
-    
-    private var _allIncluded = JSON()
-    private var _allIncludedForbidden = [String]()
     
     public init() {}
     
-    public func encode(object: Any) throws -> Data {
-        return try JSONSerialization.data(withJSONObject: encodeJSON(from: object), options: .prettyPrinted)
+    public func encode<T: Encodable>(_ object: T) throws -> Data {
+        return try JSONSerialization.data(withJSONObject: try jsonapi(object), options: .prettyPrinted)
     }
     
-    private func encodeJSON(from object: Any) throws -> JSON {
-        _allIncluded.removeAll()
+    private func jsonapi<T: Encodable>(_ object: T) throws -> JSON { //json can be either an object or an array
+        let objectData = try JSONEncoder().encode(object)
+        let jsonObject = try JSONSerialization.jsonObject(with: objectData, options: .allowFragments)
         
-        let build: (Any) throws -> JSON = { [unowned self] object in
-            guard let identifiers = self.encodeIdentifiers(object) else {
-                throw JSONAPIError.notJsonApiCompatible(object: object)
-            }
-            
-            self._allIncludedForbidden.append("\(identifiers.type):\(identifiers.id)")
-            
-            let enumeration = try self.objectEnumerate(object: object)
-            
-            //debug//print("encode object \(object) of type \(identifiers.type) with id \(identifiers.id)")
-            
-            try self.encodeIncluded(object: object)
-            
-            return try self.buildObject(identifiers: identifiers, enumeration: enumeration)
+        if let optional = jsonObject as? OptionalProtocol, !optional.isSome() {
+            throw JSONAPIError.notJsonApiCompatible(object: object)
         }
         
-        var json = JSON()
+//        #if DEBUG
+//        print("JSON")
+//        print(String(data: try! JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted), encoding: .utf8)!)
+//        #endif
         
-        if let objects = object as? [Any] {
-            json["data"] = try objects.map(build)
-
+        var result = JSON()
+        var included = JSON()
+        
+        if let array = jsonObject as? [JSON] {
+            if let badRoot = array.first(where: { $0.identifier == nil }) {
+                throw JSONAPIError.badRoot(json: badRoot)
+            }
+            
+            result["data"] = array.map({ buildJSONAPIObject(standardJson: $0, included: &included)}).compactMap({ $0 })
+            
+            filterIncluded(removingKeys: array.map({ $0.identifier! }), included: &included)
+            
+        } else if let json = jsonObject as? JSON, let build = buildJSONAPIObject(standardJson: json, included: &included) {
+            if json.identifier == nil {
+                throw JSONAPIError.badRoot(json: json)
+            }
+            
+            result["data"] = build
+            filterIncluded(removingKeys: [json.identifier!], included: &included)
         } else {
-            json["data"] = try build(object)
+            throw JSONAPIError.notJsonApiCompatible(object: object)
         }
         
-        if json["data"] != nil {
-            let included = parseIncluded()
-            if !included.isEmpty {
-                json["included"] = included
+        
+        if !included.isEmpty {
+            result["included"] = included.map({ $0.value })
+        }
+        
+        return result
+    }
+    
+    private func buildJSONAPIObject(standardJson: JSON, included: inout JSON) -> JSON? {
+        var result = JSON()
+        
+        if let attributes = buildJSONAPIAttributes(standardJson: standardJson) {
+            result.merge(attributes, uniquingKeysWith: uniquingByLast)
+        }
+        
+        if let relationships = buildJSONAPIRelations(standardJson: standardJson, included: &included) {
+            result.merge(relationships, uniquingKeysWith: uniquingByLast)
+        }
+        
+        if standardJson.meta != nil {
+            result["meta"] = standardJson.meta!
+        }
+        
+        if standardJson.links != nil {
+            result["links"] = standardJson.links!
+        }
+        
+        if let identifiers = standardJson.identifiers {
+            result.merge(identifiers, uniquingKeysWith: uniquingByLast)
+            included.merge([standardJson.identifier!: result], uniquingKeysWith: uniquingByLast)
+        }
+        
+        return result
+    }
+    
+    private func buildJSONAPIAttributes(standardJson: JSON) -> JSON? {
+        var result = JSON()
+        for (key, val) in standardJson.withoutIdentifiers {
+            if key == "meta" || key == "links" || key == "relationships" || key == "attributes" {
+                continue
             }
             
-            return json
-        }
-        
-        throw JSONAPIError.notJsonApiCompatible(object: object)
-    }
-    
-    private func parseIncluded() -> [JSON] {
-        return _allIncluded
-            .map({ $0.value as? JSON ?? JSON()})
-            .filter({ (json) -> Bool in
-                let id = json["id"] as! String
-                let type = json["type"] as! String
-                return !_allIncludedForbidden.contains("\(type):\(id)")
-            })
-    }
-    
-    private func encodeIdentifiers(_ object: Any) -> (id: String, type: String)? {
-        if let object = object as? JSON, let id = object["id"] as? String, let type = object["type"] as? String {
-            return (id: id, type: type)
-        } else {
-            let mirror = Mirror(reflecting: unwrap(object))
-            guard let id = mirror.children.first(where: { $0.label == "id" })?.value as? String,
-                let type = mirror.children.first(where: { $0.label == "type" })?.value as? String else {
-                    ////print(object, "no identifiers")
-                    return nil
-            }
-            
-            return (id: id, type: type)
-        }
-    }
-    
-    private func encodeIncluded(object: Any) throws {
-        
-        ////print("encode included for type: \(type(of: object))")
-        
-        var value: Any
-        if let optional = object as? OptionalProtocol, optional.isSome() {
-            value = optional.unwrap()
-        } else {
-            value = object
-        }
-        
-        let enumeration = try objectEnumerate(object: value)
-        
-//        let description =
-//        """
-//        encode included for \(object),
-//            attributes: \(enumeration.attributes.map({ $0.label! }).joined(separator: ", ")),
-//            objects: \(enumeration.objects.map({ "\(type(of: $0.value))" }).joined(separator: ", "))
-//        """
-//
-        //debug//print(description)
-        
-        try enumeration.objects.forEach({ try encodeIncluded(object: $0.value) })
-    
-        guard let identifiers = encodeIdentifiers(value), _allIncluded[identifiers.id] == nil else {
-            return
-        }
-        
-        let build = try buildObject(identifiers: identifiers, enumeration: enumeration)
-        _allIncluded["\(identifiers.type):\(identifiers.id)"] = build
-    }
-    
-    private func encodeRelations(enumeration: ObjectEnumeration) throws -> JSON? {
-        //debug//print("encode relations for \(enumeration.object)")
-        
-        var relations = JSON()
-        
-        for property in enumeration.objects {
-            if let label = property.label {
-                if let optional = property.value as? OptionalProtocol {
-                    if optional.isSome() {
-                        if let json = try encodeRelation(object: optional.unwrap(), key: label) {
-                            relations.merge(json, uniquingKeysWith: { a, b in a })
-                        }
-                    } else {
-                        //debug//print("\(label) -> optional nil")
-                    }
-                } else if let json = try encodeRelation(object: property.value, key: label) {
-                    relations.merge(json, uniquingKeysWith: { a, b in a })
-                }
-            }
-        }
-        
-        return relations.isEmpty ? nil : ["relationships": relations]
-    }
-    
-    private func encodeRelation(object: Any, key: String) throws -> JSON? {
-        
-        if let array = object as? [Any] {
-            //debug//print("encode relation as an Array for key: \(key)")
-            var values = [JSON]()
-            for object in array {
-                let enumeration = try objectEnumerate(object: object)
-                var current = JSON()
-                for property in enumeration.attributes {
-                    if let label = property.label {
-                        if label == "id" || label == "type" {
-                            let json = self.json(property)
-                            current.merge(json, uniquingKeysWith: { a, b in a })
-                        }
-                    }
-                }
-                values.append(current)
-            }
-            
-            return values.isEmpty ? nil : [key: ["data": values]]
-            
-        } else {
-            //debug//print("encode relation for \(object), relationKey: \(key)")
-            var values = JSON()
-            let enumeration = try objectEnumerate(object: object)
-            
-            for property in enumeration.attributes {
-                if let label = property.label {
-                    if label == "id" || label == "type" {
-                        let json = self.json(property)
-                        values.merge(json, uniquingKeysWith: { a, b in a })
-                    }
-                }
-            }
-            
-            return values.isEmpty ? nil : [key: ["data": values]]
-        }
-    }
-
-    private func encodeAttributes(enumeration: ObjectEnumeration) -> JSON? {
-        //debug//print("encode attributes for \(enumeration.object)")
-        
-        var attributes = JSON()
-        
-        for property in enumeration.attributes {
-            if let label = property.label {
-                if label != "id" && label != "type" {
-                    let json = self.json(property)
-                    attributes.merge(json, uniquingKeysWith: { a, b in a })
-                }
-            }
-        }
-    
-        return attributes.isEmpty ? nil : ["attributes": attributes]
-    }
-    
-    private func buildObject(identifiers: ObjectIdentifier, enumeration: ObjectEnumeration) throws -> JSON {
-        //debug//print("building \(identifiers.id):\(identifiers.type)")
-        
-        var json = JSON()
-        
-        json["id"] = identifiers.id
-        json["type"] = identifiers.type
-        
-        if let attributes = encodeAttributes(enumeration: enumeration) {
-            json.merge(attributes, uniquingKeysWith: { a, b in a })
-        }
-        
-        if let relations = try encodeRelations(enumeration: enumeration) {
-            json.merge(relations, uniquingKeysWith: { a, b in a })
-        }
-        
-//        if let links = links {
-//            json.merge(links, uniquingKeysWith: { a, b in a })
-//        }
-        
-        return json
-    }
-    
-    private func objectEnumerate(object: Any) throws -> ObjectEnumeration {
-        
-        //print("objectEnumerate", type(of: object))
-        
-        var attributes = [Mirror.Child]()
-        var objects = [Mirror.Child]()
-        
-        for property in Mirror(reflecting: object).children {
-            //print("\t", property.label ?? "item of array,", type(of: property.value))
-            
-            if isAnAttribute(property) {
-                attributes.append(property)
-            } else if isCodableAsRelation(property) {
-                objects.append(property)
+            if let _ = val as? JSONAPIAttributeExpressible {
+                result[key] = val
+            } else if let _ = val as? [JSONAPIAttributeExpressible] {
+                result[key] = val
+            } else if let json = val as? JSON, json.isJSONAPIAttributeExpressible {
+                result[key] = json
+            } else if let jsons = val as? [JSON], jsons.map({ $0.isJSONAPIAttributeExpressible }).reduce(true, { $0 && $1 }) {
+                result[key] = jsons
+            } else if let _ = val as? JSON {
+                continue
+            } else if let _ = val as? [JSON] {
+                continue
             } else {
-                //print("something wrong with this property")
-                throw JSONAPIError.notJsonApiCompatible(object: property.value)
+                result[key] = val
             }
         }
         
-        //print("\t\t->", "attributes:\(attributes.count), objects:\(objects.count)")
+        return result.isEmpty ? nil : ["attributes": result]
+    }
+    
+    private func buildJSONAPIRelations(standardJson: JSON, included: inout JSON) -> JSON? {
+        var result = JSON()
+        for (key, val) in standardJson.withoutIdentifiers {
+            if key == "meta" || key == "links" || key == "relationships" || key == "attributes" {
+                continue
+            }
+            
+            if let _ = val as? JSONAPIAttributeExpressible {
+                continue
+            } else if let _ = val as? [JSONAPIAttributeExpressible] {
+                continue
+            } else if let json = val as? JSON, json.isJSONAPIAttributeExpressible {
+                continue
+            } else if let jsons = val as? [JSON], jsons.map({ $0.isJSONAPIAttributeExpressible }).reduce(true, { $0 && $1 }) {
+                continue
+            } else if let json = val as? JSON {
+                result[key] = ["data": json.identifiers]
+                
+                _ = buildJSONAPIObject(standardJson: json, included: &included)
+                
+            } else if let jsons = val as? [JSON], jsons.map({ $0.isJSONAPIRelationExpressible }).reduce(true, { $0 && $1 }) {
+                result[key] = ["data": jsons.map({ $0.identifiers })]
+                
+                _ = jsons.map({ buildJSONAPIObject(standardJson: $0, included: &included) })
+            }
+        }
         
-        return (object: object, attributes: attributes, objects: objects)
+        return result.isEmpty ? nil : ["relationships": result]
     }
     
-    private func json(_ property: Mirror.Child) -> JSON {
-        return [property.label!: asItOrJson(property.value)]
+    private func filterIncluded(removingKeys: [String], included: inout JSON) {
+        removingKeys.forEach({ included.removeValue(forKey: $0) })
     }
     
-    private func asItOrJson(_ object: Any) -> Any {
-        if isPrimitive(object) || isArrayOfPrimitive(object) {
-            return object
-        } else if let sequence = object as? [Any] {
-            return sequence.map({ ($0 as! Encodable).dictionary }).compactMap({ $0 })
-        } else if let _ = object as? Encodable {
-            return (object as! Encodable).dictionary ?? object
-        }
-        return object
+    private func uniquingByLast(first: Any, last: Any) -> Any {
+        return last
     }
     
-    private func isAnAttribute(_ property: Mirror.Child) -> Bool {
-        if isPrimitive(property.value) {
-            return true
-        } else if isArrayOfPrimitive(property.value) {
-            return true
-        } else if let _ = property.value as? JSONAPIAttributeExpressible {
-            return true
-        } else if let _ = property.value as? [JSONAPIAttributeExpressible] {
-            return true
-        } else if let optional = property.value as? OptionalProtocol, let _ = optional as? JSONAPIAttributeExpressible {
-            return true
-        } else if let optional = property.value as? OptionalProtocol, let _ = optional as? [JSONAPIAttributeExpressible] {
-            return true
-        }
-        return isCodableAsAttribute(property)
-    }
-    
-    private func isCodableAsAttribute(_ property: Mirror.Child) -> Bool {
-        return isCodableAsAttribute(property.value)
-    }
-    
-    private func isCodableAsAttribute(_ value: Any) -> Bool {
-        var object: Any = value
-        if let optional = value as? OptionalProtocol {
-            object = optional
-        }
-        if let array = object as? [Any] {
-            return array.reduce(true) { isCodableAsAttribute($1) && $0 }
-        }
-        return encodeIdentifiers(object) == nil
-    }
-    
-    private func isCodableAsRelation(_ property: Mirror.Child) -> Bool {
-        return isCodableAsRelation(property.value)
-    }
-    
-    private func isCodableAsRelation(_ value: Any) -> Bool {
-        var object: Any = value
-        if let optional = value as? OptionalProtocol {
-            object = optional
-        }
-        if let array = object as? [Any] {
-            return array.reduce(true) { isCodableAsRelation($1) && $0 }
-        }
-        return encodeIdentifiers(object) != nil //missing either id or type variable, cant be serialized as a relation
-    }
-    
-    private func isArrayOfPrimitive(property: Mirror.Child) -> Bool {
-        return isArrayOfPrimitive(property.value)
-    }
-    
-    private func isArrayOfPrimitive(_ value: Any) -> Bool {
-        let propertyMetaType = type(of: value)
-        
-        if propertyMetaType is [String].Type {
-            return true
-        } else if propertyMetaType is Optional<[String]>.Type {
-            return true
-        } else if propertyMetaType is [Int].Type {
-            return true
-        } else if propertyMetaType is Optional<[Int]>.Type {
-            return true
-        } else if propertyMetaType is [Double].Type {
-            return true
-        } else if propertyMetaType is Optional<[Double]>.Type {
-            return true
-        } else if propertyMetaType is [Float].Type {
-            return true
-        } else if propertyMetaType is Optional<[Float]>.Type {
-            return true
-        } else if propertyMetaType is [Bool].Type {
-            return true
-        } else if propertyMetaType is Optional<[Bool]>.Type {
-            return true
-        }
-        return false
-    }
-    
-    private func isPrimitive(property: Mirror.Child) -> Bool {
-        return isPrimitive(property.value)
-    }
-    
-    private func isPrimitive(_ value: Any) -> Bool {
-        let propertyMetaType = type(of: value)
-        
-        if propertyMetaType is String.Type {
-            return true
-        } else if propertyMetaType is Optional<String>.Type {
-            return true
-        } else if propertyMetaType is Int.Type {
-            return true
-        } else if propertyMetaType is Optional<Int>.Type {
-            return true
-        } else if propertyMetaType is Double.Type {
-            return true
-        } else if propertyMetaType is Optional<Double>.Type {
-            return true
-        } else if propertyMetaType is Float.Type {
-            return true
-        } else if propertyMetaType is Optional<Float>.Type {
-            return true
-        } else if propertyMetaType is Bool.Type {
-            return true
-        } else if propertyMetaType is Optional<Bool>.Type {
-            return true
-        }
-        return false
-    }
-    
-    private func unwrap(_ object: Any) -> Any {
-        if let optional = object as? OptionalProtocol, optional.isSome() {
-            return optional.unwrap()
-        }
-        return object
+    private func uniquingByFirst(first: Any, last: Any) -> Any {
+        return first
     }
 }
 
-fileprivate extension Dictionary where Key == String, Value == Any {
+extension Dictionary where Key == String, Value == Any {
+    
     var id: String? {
         return self["id"] as? String
     }
@@ -395,19 +169,90 @@ fileprivate extension Dictionary where Key == String, Value == Any {
     var identifiers: [Key: Value]? {
         return id != nil && type != nil ? ["id": id!, "type": type!] : nil
     }
+    
+    var identifier: String? {
+        return id != nil && type != nil ? "\(id!):\(type!)" : nil
+    }
+    
+    var withoutIdentifiers: [Key: Value] {
+        var result = self
+        result.removeValue(forKey: "id")
+        result.removeValue(forKey: "type")
+        return result
+    }
+    
+    var attributes: [Key: Value]? {
+        return self["attributes"] as? [String: Any]
+    }
+    
+    var relationships: [Key: Value]? {
+        return self["relationships"] as? [String: Any]
+    }
+    
+    var meta: [Key: Value]? {
+        return self["meta"] as? [String: Any]
+    }
+    
+    var links: [Key: Value]? {
+        return self["links"] as? [String: Any]
+    }
+    
+    var included: [[Key: Value]]? {
+        return self["included"] as? [[String: Any]]
+    }
+    
+    var child: [Key: Value]? {
+        return self["data"] as? [String: Any]
+    }
+    
+    var children: [[Key: Value]]? {
+        return self["data"] as? [[String: Any]]
+    }
+    
+    var isJSONAPIAttributeExpressible: Bool {
+        return id == nil || id!.isEmpty || type == nil || type!.isEmpty
+    }
+    
+    var isJSONAPIRelationExpressible: Bool {
+        return !isJSONAPIAttributeExpressible
+    }
 }
 
 extension Encodable {
-    var dictionary: [String: Any]? {
+    var jsonapi: [String: Any]? {
+        guard let data = try? JSONAPIEncoder().encode(self) else { return nil }
+        return (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)).flatMap { $0 as? [String: Any] }
+    }
+    
+    var json: Any? {
         guard let data = try? JSONEncoder().encode(self) else { return nil }
         return (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)).flatMap { $0 as? [String: Any] }
     }
 }
 
-extension Sequence where Iterator.Element: Encodable {
+//extension Sequence where Iterator.Element: Encodable {
+//    var jsonArray: [[String: Any]]? {
+//        return reduce([], { collection, element in collection + [element.json] }).compactMap({ $0 }) as? [[String: Any]]
+//    }
+//}
+
+extension Dictionary {
+    subscript(nestedObjectAt key: Key) -> [String: Any]? {
+        get {
+            return self[key] as? [String: Any]
+        }
+        set {
+            self[key] = newValue as? Value
+        }
+    }
     
-    var sequenceDictionary: [[String: Any]] {
-        return reduce([], { collection, element in collection + [element.dictionary] }).compactMap({ $0 })
+    subscript(nestedArrayAt key: Key) -> [[String: Any]]? {
+        get {
+            return self[key] as? [[String: Any]]
+        }
+        set {
+            self[key] = newValue as? Value
+        }
     }
 }
 
