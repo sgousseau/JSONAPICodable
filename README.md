@@ -36,7 +36,7 @@ Xcode 9.0+
 
 ## Authors
 
-* **Sébastien Gousseau** - *Initial work* - [Sgousseau](https://github.com/sgousseau)
+* **Sébastien Gousseau** - [Sgousseau](https://github.com/sgousseau)
 
 ## License
 
