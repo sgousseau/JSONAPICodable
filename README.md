@@ -46,7 +46,7 @@ A nested object will be serialized as a Relationship if it comforms to the above
 
 A nested object will be serialized as an attribute if it has a missing id or type variable. Also, you can extend your object type to be JSONAPIAttributeExpressible to force the serialization as an attribute. A primitive, an array of primitive, a JSONAPIAttributeExpressible, an array of JSONAPIAttributeExpressible, will all be serialized as an attribute.
 
-Any object can contains links or meta data. If the Codable definition of the object accept a Link Codable structure, or any other meta structure, it will be serialized too. The only exeption for now is for an array decoding, the root links are to be serialized in each decoded objects instead of a root document containing the array of objects plus the metas.
+Any object can contains links or meta. 
 
 A meta property will be serialized as it. 
 ```swift
@@ -56,6 +56,8 @@ A links property will be serialized as it.
 ```swift
 var links: LinksObject
 ```
+
+The only exeption for now is for an array decoding, the root links are to be serialized in each decoded objects instead of a root document containing the array of objects plus the metas. That means links or meta at root level would override links or meta at object level. This is a temporary behavior waiting other decoding/encoding options.
 
 ## Deployment
 
