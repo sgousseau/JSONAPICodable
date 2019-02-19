@@ -18,7 +18,7 @@ pod install
 
 Use like JSONEncoder() and JSONDecoder(). Models have to be Encodable do be used with JSONAPIEncoder, and Decodable with JSONAPIDecoder.
 
-```
+```swift
 try JSONAPIDecoder().decode(Model.self, from: data)
 try JSONAPIDecoder().decode([Model].self, from: data)
 ```
