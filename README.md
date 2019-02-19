@@ -23,7 +23,7 @@ try JSONAPIDecoder().decode(Model.self, from: data)
 try JSONAPIDecoder().decode([Model].self, from: data)
 ```
 
-```
+```swift
 try JSONAPIEncoder().encode(Encodable)
 ```
 
@@ -36,7 +36,7 @@ This method ensure that you can keep the flexibility of Codable structures, with
 In short:
 
 A root object will be serialized only if it contains 2 variables: 
-```
+```swift
 let id: String
 let type: String
 ```
@@ -48,8 +48,8 @@ A nested object will be serialized as an attribute if it has a missing id or typ
 
 Any object can contains links or meta data. If the Codable definition of the object accept a Link Codable structure, or any other meta structure, it will be serialized too. The only exeption for now is for an array decoding, the root links are to be serialized in each decoded objects instead of a root document containing the array of objects plus the metas.
 
-A meta property will be serialized as it. ```var meta: MetaObject```
-A links property will be serialized as it. ```var links: LinksObject```
+A meta property will be serialized as it. ```swiftvar meta: MetaObject```
+A links property will be serialized as it. ```swiftvar links: LinksObject```
 
 ## Deployment
 
