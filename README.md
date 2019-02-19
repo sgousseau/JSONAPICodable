@@ -16,8 +16,7 @@ pod install
 
 ### Usage
 
-Use like JSONEncoder() and JSONDecoder(). 
-Simply use JSONAPIEncoder().encode(obj) and JSONAPIDecoder().decode(type, data)
+Use like JSONEncoder() and JSONDecoder(). Models have to be Encodable do be used with JSONAPIEncoder, and Decodable with JSONAPIDecoder.
 
 ```
 try JSONAPIDecoder().decode(Model.self, from: data)
@@ -28,7 +27,20 @@ try JSONAPIDecoder().decode([Model].self, from: data)
 try JSONAPIEncoder().encode(Encodable)
 ```
 
-A root object will be serialized only if it contains 2 principal variables: let id: String, let type: String. Let or Var is  at your convenance, there is no type conflict if you declare two structures with the same type. The JSONAPIDecoder will just try to instanciate the structure with the JSON standard format.
+### How it works
+
+Swift only understand JSON format for the new Codable structures. So, the key principle is to convert any JSON:API format to an understandable JSON for our Codables at decoding. At encoding, the same process is applied, the JSON issued by JSONEncoder will be converted to a JSON:API.
+
+This method ensure that you can keep the flexibility of Codable structures, with Coding keys support. Custom decoding and encoding strategy are not yet supported.
+
+In short:
+
+A root object will be serialized only if it contains 2 variables: 
+```
+let id: String
+let type: String
+```
+Let or Var is  at your convenance, there is no type conflict if you declare two structures with the same type. The JSONAPIDecoder will just try to instanciate the structure with the JSON format.dddddddddddddd
 
 A nested object will be serialized as a Relationship if it comforms to the above rule (id and type variables).
 
