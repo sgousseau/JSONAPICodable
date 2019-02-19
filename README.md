@@ -40,7 +40,7 @@ A root object will be serialized only if it contains 2 variables:
 let id: String
 let type: String
 ```
-Let or Var is  at your convenance, there is no type conflict if you declare two structures with the same type. The JSONAPIDecoder will just try to instanciate the structure with the JSON format.dddddddddddddd
+Let or Var is  at your convenance, there is no type conflict if you declare two structures with the same type. The JSONAPIDecoder will just try to instanciate the structure with the JSON format.
 
 A nested object will be serialized as a Relationship if it comforms to the above rule (id and type variables).
 
@@ -48,6 +48,8 @@ A nested object will be serialized as an attribute if it has a missing id or typ
 
 Any object can contains links or meta data. If the Codable definition of the object accept a Link Codable structure, or any other meta structure, it will be serialized too. The only exeption for now is for an array decoding, the root links are to be serialized in each decoded objects instead of a root document containing the array of objects plus the metas.
 
+A meta property will be serialized as it. ```var meta: MetaObject```
+A links property will be serialized as it. ```var links: LinksObject```
 
 ## Deployment
 
