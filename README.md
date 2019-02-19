@@ -16,14 +16,15 @@ pod install
 
 ### Usage
 
-Use like JSONEncoder() and JSONDecoder(). Simply use JSONAPIEncoder().encode(object:) and JSONAPIDecoder().decode(object:)
+Use like JSONEncoder() and JSONDecoder(). 
+Simply use JSONAPIEncoder().encode(obj) and JSONAPIDecoder().decode(type, data)
 
 ```
 try JSONAPIDecoder().decode(Model.self, from: data)
 ```
 
 ```
-try JSONAPIEncoder().encode(object: Encodable)
+try JSONAPIEncoder().encode(Encodable)
 ```
 
 ## Deployment
