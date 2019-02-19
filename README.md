@@ -59,6 +59,21 @@ var links: LinksObject
 
 The only exeption for now is for an array decoding, the root links are to be serialized in each decoded objects instead of a root document containing the array of objects plus the metas. That means links or meta at root level would override links or meta at object level. This is a temporary behavior waiting other decoding/encoding options.
 
+### Error handling WIP
+
+JSONAPIEncoder and JSONAPIDecoder will throw errors of type JSONAPIError: Error, in addition to the JSONEncoder and JSONDecoder errors.
+
+JSONAPIEncoder errors:
+```swift
+  case badRoot(json: JSON)
+  case notJsonApiCompatible(object: Any)
+```
+JSONAPIDecoder errors:
+```swift
+  case notJson(data: Data)
+  case notDecodable(type: AnyClass)
+```
+
 ## Deployment
 
 iOS 7.0+
