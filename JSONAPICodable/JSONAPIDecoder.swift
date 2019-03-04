@@ -1,10 +1,19 @@
 import Foundation
 
+public enum DecodingOption {
+    case rootLevelLinksOverride
+    case objectLevelLinksOverride
+}
+
 public final class JSONAPIDecoder {
     
     public init() {}
     
-    public func decode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable {
+    private var decodingOption: DecodingOption!
+    
+    public func decode<T>(_ type: T.Type, from data: Data, option: DecodingOption = .rootLevelLinksOverride) throws -> T where T: Decodable {
+        
+        self.decodingOption = option
         
         guard let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? JSON,
             let dataObject = jsonObject?["data"]
@@ -13,15 +22,16 @@ public final class JSONAPIDecoder {
         }
         
         let included = jsonObject?["included"] as? [JSON]
+        let links = jsonObject?["links"] as? JSON
         
         let json: Any!
         
         if let array = dataObject as? [JSON] {
-            json = array.map({ buildCodableJSON(object: $0, included: included ?? []) }).compactMap({ $0 })
+            json = array.map({ buildCodableJSON(object: $0, included: included ?? [], links: links, option: option) }).compactMap({ $0 })
         } else if let object = dataObject as? JSON {
-            json = buildCodableJSON(object: object, included: included ?? [])
+            json = buildCodableJSON(object: object, included: included ?? [], links: links, option: option)
         } else {
-            throw JSONAPIError.notCodable(type: T.self as! AnyClass)
+            throw JSONAPIError.notDecodable(type: T.self as! AnyClass)
         }
         
         let jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
@@ -57,7 +67,7 @@ public final class JSONAPIDecoder {
                 json.merge(identifiers, uniquingKeysWith: { a, b in a })
                 
                 if let includedData = self.getIncludedData(included: included, identifier: object.identifier!) {
-                    return self.buildCodableJSON(object: includedData, included: included)
+                    return self.buildCodableJSON(object: includedData, included: included, links: nil, option: self.decodingOption)
                 }
             }
             return json
@@ -126,7 +136,7 @@ public final class JSONAPIDecoder {
         return json
     }
     
-    private func buildCodableJSON(object: JSON, included: [JSON]) -> JSON? {
+    private func buildCodableJSON(object: JSON, included: [JSON], links: JSON?, option: DecodingOption) -> JSON? {
         var json = JSON()
         
         guard let identifiers = buildIdentifiers(object: object) else {
@@ -143,7 +153,9 @@ public final class JSONAPIDecoder {
             json.merge(relations, uniquingKeysWith: { a, b in a })
         }
         
-        if let links = object.links {
+        if case .rootLevelLinksOverride = option, let links = links {
+            json["links"] = links
+        } else if case .objectLevelLinksOverride = option, let links = object.links {
             json["links"] = links
         }
         

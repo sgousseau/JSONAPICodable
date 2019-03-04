@@ -276,3 +276,31 @@ class RelatedMetaLink: Codable {
 class Meta: Codable {
     
 }
+
+class Package: Codable {
+    var id: String
+    var type: String = "packages"
+    var title: String?
+    var quantityExpected: Int?
+    var recipient: String?
+    var sender: String?
+    var availableSince: String?
+    var status: PackageStatus?
+    
+    var links: PaginationLinks?
+}
+
+struct PaginationLinks: Codable {
+    let first: String?
+    let prev: String?
+    let next: String?
+    let last: String?
+}
+
+class PackageStatus: Codable {
+    var id: String
+    var type: String = "packageStatus"
+    var code: String?
+    var lastUpdate: String
+    
+}

@@ -2,7 +2,7 @@ import Foundation
 
 public enum JSONAPIError: Error {
     case encodeNil
-    case notCodable(type: AnyClass)
+    case notDecodable(type: AnyClass)
     case notJson(data: Data)
     case notJsonApiCompatible(object: Any)
     case badRoot(json: JSON)
