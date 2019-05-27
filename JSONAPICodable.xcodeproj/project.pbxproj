@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E481C2DD229BE7D200E65EC0 /* JSONAPIGlobals.swift in Sources */ = {isa = PBXBuildFile; fileRef = E481C2DC229BE7D200E65EC0 /* JSONAPIGlobals.swift */; };
 		FB1F6AD321C317B100509391 /* SampleModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCDA09321BC7B5300493873 /* SampleModels.swift */; };
 		FB2EAB5321BC7618006A7F1D /* JSONAPICodable.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB2EAB4921BC7618006A7F1D /* JSONAPICodable.framework */; };
 		FB2EAB5821BC7618006A7F1D /* JSONAPICodableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB2EAB5721BC7618006A7F1D /* JSONAPICodableTests.swift */; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E481C2DC229BE7D200E65EC0 /* JSONAPIGlobals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONAPIGlobals.swift; sourceTree = "<group>"; };
 		FB2EAB4921BC7618006A7F1D /* JSONAPICodable.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = JSONAPICodable.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB2EAB4C21BC7618006A7F1D /* JSONAPICodable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSONAPICodable.h; sourceTree = "<group>"; };
 		FB2EAB4D21BC7618006A7F1D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -98,6 +100,7 @@
 				FB7712BB21BFE5AE00765F87 /* JSONAPIError.swift */,
 				FB7712BD21BFE7D500765F87 /* JSONAPIEncoder.swift */,
 				FB7712BF21BFE7F800765F87 /* JSONAPIDecoder.swift */,
+				E481C2DC229BE7D200E65EC0 /* JSONAPIGlobals.swift */,
 			);
 			path = JSONAPICodable;
 			sourceTree = "<group>";
@@ -232,6 +235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB1F6AD321C317B100509391 /* SampleModels.swift in Sources */,
+				E481C2DD229BE7D200E65EC0 /* JSONAPIGlobals.swift in Sources */,
 				FB7712BC21BFE5AE00765F87 /* JSONAPIError.swift in Sources */,
 				FB7712BE21BFE7D500765F87 /* JSONAPIEncoder.swift in Sources */,
 				FB7712C021BFE7F800765F87 /* JSONAPIDecoder.swift in Sources */,
