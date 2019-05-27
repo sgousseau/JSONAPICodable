@@ -23,24 +23,24 @@ extension Optional : JSONAPIOptional {
     }
 }
 
+public enum JSONAPIIdEncodingStrategy {
+    case withoutId
+    case withRandomId
+    case withId
+}
 
 public final class JSONAPIEncoder {
     
     public init() {}
     
-    enum IdEncodingStrategy {
-        case withoutId
-        case withRandomId
-        case withId
+    private var encodingStrategy: JSONAPIIdEncodingStrategy = .withRandomId
+    
+    public func encode<T: Encodable>(_ object: T, encoding strategy: JSONAPIIdEncodingStrategy = .withRandomId) throws -> Data {
+        return try JSONSerialization.data(withJSONObject: try jsonapi(object, encoding: strategy), options: .prettyPrinted)
     }
     
-    private var encodingStrategy: IdEncodingStrategy = .withRandomId
-    
-    public func encode<T: Encodable>(_ object: T) throws -> Data {
-        return try JSONSerialization.data(withJSONObject: try jsonapi(object), options: .prettyPrinted)
-    }
-    
-    private func jsonapi<T: Encodable>(_ object: T) throws -> [String: Any] { //json can be either an object or an array
+    private func jsonapi<T: Encodable>(_ object: T, encoding strategy: JSONAPIIdEncodingStrategy = .withRandomId) throws -> [String: Any] {
+        
         let objectData = try JSONEncoder().encode(object)
         let jsonObject = try JSONSerialization.jsonObject(with: objectData, options: .allowFragments)
         
